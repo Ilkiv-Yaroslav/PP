@@ -1,0 +1,655 @@
+openapi: 3.0.1
+info:
+  description: |
+    Lab_5 , Option 13
+  title: Swagger Family bank account
+  contact:
+    email: yaroslav.ilkiv.knm.2020@lpnu.ua
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: "1.0.0"
+tags:
+  - name: Family
+    description: All about your Family's account
+  - name: bank
+    description: Access to bank orders
+  - name: Settings
+    description: Operations about user
+  - name: History
+    description: All operations
+paths:
+  /Family:
+    post:
+      tags:
+        - Family
+      summary: Add a new member to the Family
+      operationId: addFamily
+      responses:
+        200:
+          description: successful operation
+        401:
+          description: Invalid input
+      security:
+        - bank_auth:
+            - write:Familys
+            - read:Familys
+      requestBody:
+        $ref: '#/components/requestBodies/Family'
+  /Family/addTo{addTo}:
+    put:
+      tags:
+        - Family
+      summary: Change settings for Family
+      operationId: updateFamily
+      parameters:
+        - name: addTo
+          in: path
+          description: ID of Family to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: successful operation
+        401:
+          description: Invalid ID supplied
+        402:
+          description: Family not found
+      security:
+        - bank_auth:
+            - write:Familys
+            - read:Familys
+      requestBody:
+        $ref: '#/components/requestBodies/Family'
+
+  /Family/{FamilyId}:
+    get:
+      tags:
+        - Family
+      summary: Find Family with id
+      description: Returns a single Family
+      operationId: getFamilyById
+      parameters:
+        - name: FamilyId
+          in: path
+          description: ID of Family to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Family'
+        400:
+          description: Invalid ID supplied
+        402:
+          description: Family not found
+      security:
+        - api_key: []
+  
+    delete:
+      tags:
+        - Family
+      summary: Delete Family account
+      operationId: deleteFamily
+      parameters:
+        - name: api_key
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: FamilyId
+          in: path
+          description: Family id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: successful operation
+        401:
+          description: Invalid ID supplied
+        402:
+          description: Family not found
+      security:
+        - bank_auth:
+            - write:Familys
+            - read:Familys
+            
+            
+  /bank/Bank_get_balance:
+    get:
+      tags:
+        - bank
+      summary: Get your balance
+      description: Returns a map of status codes to quantities
+      operationId: getInventory
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+      security:
+        - api_key: []
+  /bank/transfer_to_bank:
+    put:
+      tags:
+        - bank
+      summary: Transfer money to family account
+      operationId: transferMoney
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bank'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Bank'
+        403:
+          description: Invalid Operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bank'
+        description: Fault in money operations
+        required: true
+  /bank/createNewAccount:
+    post:
+      tags:
+        - bank
+      summary: Create new bank account
+      operationId: placeOrder
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bank'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Bank'
+        403:
+          description: Invalid bank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bank'
+        description: order placed for purchasing the Family
+        required: true
+  /bank/delete/{BankAcc}:
+    delete:
+      tags:
+        - bank
+      summary: Delete bank account
+      description: dele
+      operationId: deleteOrder
+      parameters:
+        - name: BankAcc
+          in: path
+          description: ID of the order that needs to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        400:
+          description: successful operation
+        401:
+          description: Invalid ID supplied
+        402:
+          description: Account not found
+          
+          
+  /bank/WithdrowTo/{userid}:
+    get:
+      tags:
+        - bank
+      summary: Withdraw money from bank to user
+      description: Withdraws money from family bank to user
+      operationId: getOrderById
+      parameters:
+        - name: userid
+          in: path
+          description: ID of Family that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 10
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bank'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Bank'
+        401:
+          description: Invalid user
+        403:
+          description: Not enough money to withdraw
+          
+   
+  /Settings:
+    post:
+      tags:
+        - Settings
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /Settings/login:
+    get:
+      tags:
+        - Settings
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        401:
+          description: Invalid username/password supplied
+  /Settings/logout:
+    get:
+      tags:
+        - Settings
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+          
+          
+  /Settings/{username}:
+    get:
+      tags:
+        - Settings
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched. Use user1 for testing.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: Invalid username supplied
+        402:
+          description: User not found
+    put:
+      tags:
+        - Settings
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+        401:
+          description: Invalid user supplied
+        402:
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+    delete:
+      tags:
+        - Settings
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+        401:
+          description: Invalid username supplied
+        402:
+          description: User not found
+          
+
+  /History:
+    post:
+      tags:
+        - History
+      summary: Create new transaction
+      description: This is transaction.
+      operationId: AddTransaction
+      responses:
+        200:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transactions'
+        description: Created transaction object
+        required: true
+  /History/UpdateExtra:
+    put:
+      tags:
+        - History
+      summary: Update extra info
+      description: Updating extra info.
+      operationId: UpdateExtra
+      responses:
+        200:
+          description: successful operation
+        401:
+          description: Invalid user supplied
+        402:
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transactions'
+        description: Update extra
+        required: true
+
+  /History/{GetTById}:
+    get:
+      tags:
+        - History
+      summary: Get operations by id
+      operationId: getUserByid
+      parameters:
+        - name: GetTById
+          in: path
+          description:  Id of operations.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        401:
+          description: Invalid id
+        402:
+          description: Id not found
+          
+  /History/Get_all_user_transactions/{UserTransactionsByID}:    
+    get:
+      tags:
+        - History
+      summary: Get user transactions
+      operationId: getUserTransaction
+      parameters:
+        - name: UserTransactionsByID
+          in: path
+          description:  Id of transaction.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        401:
+          description: Invalid id
+        402:
+          description: Id not found
+          
+  /History/GetAllTransactions:
+    get:
+      tags:
+        - History
+      summary: Get all transactions
+      operationId: getAllTransactions
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        403:
+          description: No transactions
+
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        FamilyId:
+          type: integer
+          format: int32
+        userStatus:
+          type: integer
+          format: int32
+          description: User Status
+      xml:
+        name: User
+    Bank:
+      type: object
+      required:
+        - id
+        - name
+        - AmountOfMoney
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        AmountOfMoney:
+          type: integer
+          format: int64
+      xml:
+        name: Ban
+    Family:
+      type: object
+      required:
+        - name
+        - BankId
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        BankId:
+          type: integer
+          format: int32
+        FamilyMembers:
+          type: array
+          items:
+              $ref: '#/components/schemas/User'    
+          minItems: 3
+        History:
+          type: array
+          items:
+              $ref: '#/components/schemas/Transactions'    
+      xml:
+        name: Family
+        
+
+    Transactions:
+      type: object
+      required:
+        - id
+        - BankId
+        - date
+        - amount
+        - UserId
+      properties:
+        id:
+          type: integer
+          format: int32
+        UserId:
+          type: integer
+          format: int32
+        date:
+          type: string
+          format: date-time
+        amount:
+          type: integer
+          format: int64
+        ExtraInfo:
+          type: string
+
+        BankId:
+          type: integer
+          format: int32
+      xml:
+        name: Transactions
+
+  requestBodies:
+    Family:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Family'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Family'
+      description: Family object that needs to be added to the bank
+      required: true
+    UserArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+      description: List of user object
+      required: true
+  securitySchemes:
+    bank_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://bank.swagger.io/oauth/dialog
+          scopes:
+            write:Families: modify Families in your account
+            read:Families: read your Families
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
