@@ -1,4 +1,7 @@
 # LabAP
+Для успішного заупуску програми потрібно встановити фреймворк FLASK через термінал
+pip install flask
+
 python 3.8.2 virtualenv+requirements.txt
 Запуск сервера
 --port=5000
